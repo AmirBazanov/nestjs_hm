@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model files {
+  file          String   @unique
+  create_at     DateTime @default(now())
+  essence_table String
+  essence_id    Int
+}
+
+model profiles {
+  profile_id   Int    @id @default(autoincrement())
+  first_name   String
+  second_name  String
+  surname      String
+  phone_number String
+  bio          String
+  user_id      Int    @unique
+  users        users? @relation(fields: [user_id], references: [user_id])
+}
+
+model text_blocks {
+  serch_title String @unique
+  title       String
+  image       String
+  text        String
+  group       String
+}
+
+model users {
+  user_id  Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  role     roles[]
+  profiles profiles?
+}
+
+model roles {
+  role_id Int     @id @default(autoincrement())
+  role    String  @unique
+  user    users[]
+}
