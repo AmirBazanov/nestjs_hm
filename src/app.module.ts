@@ -6,9 +6,9 @@ import { FilesModule } from './files/files.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TextBlocksModule } from './text-blocks/text-blocks.module';
 import { ProfilesModule } from './profiles/profiles.module';
-import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -19,8 +19,9 @@ import { ConfigModule } from '@nestjs/config';
     PrismaModule,
     UsersModule,
     ConfigModule.forRoot(),
+    RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, UsersService],
+  providers: [AppService],
 })
 export class AppModule {}

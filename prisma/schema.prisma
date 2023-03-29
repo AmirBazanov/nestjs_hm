@@ -22,7 +22,7 @@ model profiles {
   phone_number String
   bio          String
   user_id      Int    @unique
-  users        users? @relation(fields: [user_id], references: [user_id])
+  user         users? @relation(fields: [user_id], references: [user_id], onUpdate: Cascade, onDelete: Cascade)
 }
 
 model text_blocks {
@@ -34,15 +34,18 @@ model text_blocks {
 }
 
 model users {
-  user_id  Int       @id @default(autoincrement())
-  email    String    @unique
-  password String
-  role     roles[]
-  profiles profiles?
+  user_id       Int       @id @default(autoincrement())
+  email         String    @unique
+  password      String
+  roles         roles?    @relation(fields: [role], references: [role], onDelete: SetDefault, onUpdate: Cascade)
+  role          String?   @default("User")
+  profiles      profiles?
+  refresh_token String?
 }
 
 model roles {
   role_id Int     @id @default(autoincrement())
   role    String  @unique
-  user    users[]
+  users   users[]
+  user_id Int[]
 }

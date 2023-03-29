@@ -1,15 +1,7 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { RegistrationDto } from './dto/registration.dto';
+import { Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { compare } from 'bcrypt';
-import { WRONG_PASS_OR_LOGIN } from '../constants/auth.constants';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -20,35 +12,23 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(loginDto: LoginDto) {
-    const { email, password } = loginDto;
-    const user = await this.userService.findOne(email);
-    if (!user) throw new UnauthorizedException(WRONG_PASS_OR_LOGIN);
-    if (await compare(password, user.password)) {
-      return { email: email, userId: user.user_id };
-    }
-    throw new UnauthorizedException(WRONG_PASS_OR_LOGIN);
-  }
-  async login(user: { email: string; userId: number }) {
-    const payload = { email: user.email, userId: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+  async login(loginDto: LoginDto) {
+    const validatedUser = await this.userService.validateUser(loginDto);
+    const { role, ...user } = validatedUser;
+    return this.getTokens(user, role);
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async getTokens(user, role: string) {
+    const payload = { email: user.email, userId: user.user_id, role: role };
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+    });
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d',
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    await this.userService.updateToken(user.user_id, refresh_token);
 
-  update(id: number, updateAuthDto: LoginDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return { access_token: token, refresh_token: refresh_token };
   }
 }

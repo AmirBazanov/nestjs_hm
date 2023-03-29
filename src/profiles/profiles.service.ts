@@ -10,31 +10,69 @@ export class ProfilesService {
     return this.prisma.profiles.create({
       data: {
         ...createProfileDto,
-        users: {
+        user: {
           connect: {
             user_id: userId,
           },
         },
       },
       include: {
-        users: { select: { role: true, password: false, email: true } },
+        user: {
+          select: {
+            email: true,
+          },
+        },
       },
     });
   }
 
   findAll() {
-    return `This action returns all profiles`;
+    return this.prisma.profiles.findMany({
+      include: { user: { select: { email: true, role: true } } },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} profile`;
+    return this.prisma.profiles.findFirst({
+      where: { profile_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
+  }
+
+  findOneByUserId(id: number) {
+    return this.prisma.profiles.findFirst({
+      where: { user_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
   }
 
   update(id: number, updateProfileDto: UpdateProfileDto) {
-    return `This action updates a #${id} profile`;
+    return this.prisma.profiles.update({
+      data: updateProfileDto,
+      where: { profile_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
+  }
+
+  updateByUserId(id: number, updateProfileDto: UpdateProfileDto) {
+    return this.prisma.profiles.update({
+      data: updateProfileDto,
+      where: { user_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} profile`;
+    return this.prisma.profiles.delete({
+      where: { profile_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
+  }
+
+  removeByUserId(id: number) {
+    return this.prisma.profiles.delete({
+      where: { user_id: id },
+      include: { user: { select: { email: true, role: true } } },
+    });
   }
 }
