@@ -16,7 +16,10 @@ import {
   ROLE_NOT_FOUND,
   USER_ALREADY_GOT_ROLE,
 } from '../constants/roles.constants';
-import { USER_NOT_FOUND } from '../constants/user.constants';
+import {
+  USER_ALREADY_EXIST,
+  USER_NOT_FOUND,
+} from '../constants/user.constants';
 
 @Injectable()
 export class UsersService {
@@ -27,13 +30,19 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const salt = await genSalt(10);
-    return this.prismaService.users.create({
-      data: {
-        ...createUserDto,
-        password: await hash(createUserDto.password, salt),
-        roles: { connect: { role: 'User' } },
-      },
-    });
+    let result;
+    try {
+      result = await this.prismaService.users.create({
+        data: {
+          ...createUserDto,
+          password: await hash(createUserDto.password, salt),
+          roles: { connect: { role: 'User' } },
+        },
+      });
+    } catch (e) {
+      throw new ConflictException(USER_ALREADY_EXIST);
+    }
+    return result;
   }
 
   async validateUser(loginDto: LoginDto) {
@@ -76,21 +85,21 @@ export class UsersService {
   }
 
   findOneById(id: number) {
-    return this.prismaService.users.findFirst({
+    return this.prismaService.users.findFirstOrThrow({
       where: { user_id: id },
       select: { user_id: true, email: true },
     });
   }
 
   getRefreshTokenById(id: number) {
-    return this.prismaService.users.findFirst({
+    return this.prismaService.users.findFirstOrThrow({
       where: { user_id: id },
       select: { refresh_token: true },
     });
   }
 
   findOneByEmail(email: string) {
-    return this.prismaService.users.findFirst({
+    return this.prismaService.users.findFirstOrThrow({
       where: { email: email },
       select: {
         email: true,
@@ -110,6 +119,7 @@ export class UsersService {
         password: await hash(updateUserDto.password, salt),
       },
       where: { user_id: id },
+      select: { email: true, role: true, user_id: true, profiles: true },
     });
   }
 

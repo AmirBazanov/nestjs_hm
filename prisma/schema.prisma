@@ -8,6 +8,7 @@ datasource db {
 }
 
 model files {
+  file_id       Int      @id @default(autoincrement())
   file          String   @unique
   create_at     DateTime @default(now())
   essence_table String
@@ -26,11 +27,12 @@ model profiles {
 }
 
 model text_blocks {
-  serch_title String @unique
-  title       String
-  image       String
-  text        String
-  group       String
+  text_block_id Int    @id @default(autoincrement())
+  search_title  String @unique
+  title         String
+  image         String
+  text          String
+  group         String
 }
 
 model users {

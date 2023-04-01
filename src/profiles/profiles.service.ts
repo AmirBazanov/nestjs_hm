@@ -33,14 +33,14 @@ export class ProfilesService {
   }
 
   findOne(id: number) {
-    return this.prisma.profiles.findFirst({
+    return this.prisma.profiles.findFirstOrThrow({
       where: { profile_id: id },
       include: { user: { select: { email: true, role: true } } },
     });
   }
 
   findOneByUserId(id: number) {
-    return this.prisma.profiles.findFirst({
+    return this.prisma.profiles.findFirstOrThrow({
       where: { user_id: id },
       include: { user: { select: { email: true, role: true } } },
     });

@@ -5,10 +5,10 @@ import { ApiProperty } from '@nestjs/swagger';
 export class LoginDto
   implements Omit<users, 'user_id' | 'refresh_token' | 'role'>
 {
-  @ApiProperty()
+  @ApiProperty({ example: 'test@gmail.com' })
   @IsString()
   email: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'password123' })
   @IsString()
   password: string;
 }

@@ -17,13 +17,17 @@ import {
   PrismaProfileExceptionFilter,
   PrismaUserExceptionFilter,
 } from '../prisma-client-exception/prisma-client-exception.filter';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { RegistrationResponseDto } from '../auth/dto/registration.response.dto';
 
+@ApiTags('Profile')
 @UseGuards(JwtAccessGuard, RolesGuard)
 @Controller('profiles')
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
   @Roles('Admin')
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   @UseFilters(new PrismaProfileExceptionFilter())
   @Get()
   findAll() {
@@ -31,6 +35,7 @@ export class ProfilesController {
   }
 
   @Roles('Admin', 'Owner')
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   @UseFilters(new PrismaProfileExceptionFilter())
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -39,6 +44,7 @@ export class ProfilesController {
 
   @Roles('Admin', 'Owner')
   @UseFilters(new PrismaProfileExceptionFilter())
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
     return this.profilesService.update(+id, updateProfileDto);
@@ -46,18 +52,21 @@ export class ProfilesController {
 
   @Roles('Admin', 'Owner')
   @UseFilters(new PrismaProfileExceptionFilter())
+  @ApiCreatedResponse({ status: 200 })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.profilesService.remove(+id);
   }
   @Roles('Admin', 'Owner')
   @UseFilters(new PrismaUserExceptionFilter())
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   @Get('/user/:id')
   findOneByUserId(@Param('id') id: string) {
     return this.profilesService.findOneByUserId(+id);
   }
   @Roles('Admin', 'Owner')
   @UseFilters(new PrismaUserExceptionFilter())
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   @Patch('/user/:id')
   updateByUserId(
     @Param('id') id: string,

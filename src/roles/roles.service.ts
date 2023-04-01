@@ -14,11 +14,15 @@ export class RolesService {
   }
 
   findOne(id: number) {
-    return this.prismaService.roles.findFirst({ where: { role_id: id } });
+    return this.prismaService.roles.findFirstOrThrow({
+      where: { role_id: id },
+    });
   }
 
   getRoleByValue(value: string) {
-    return this.prismaService.roles.findFirst({ where: { role: value } });
+    return this.prismaService.roles.findFirstOrThrow({
+      where: { role: value },
+    });
   }
 
   addUserToRole(role: string, userId: number) {

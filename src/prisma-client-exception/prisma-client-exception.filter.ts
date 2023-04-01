@@ -10,6 +10,7 @@ import { Response } from 'express';
 import { ROLE_NOT_FOUND } from '../constants/roles.constants';
 import { PROFILE_NOT_FOUND } from '../constants/profile.constants';
 import { USER_NOT_FOUND } from '../constants/user.constants';
+import { TEXT_NOT_FOUND } from '../constants/text-block.constants';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
@@ -46,17 +47,19 @@ export class PrismaUserExceptionFilter extends BaseExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const message = exception.message;
-    if (exception.meta) {
-      response.status(404).json({
-        statusCode: 404,
-        error: USER_NOT_FOUND,
-      });
-      return;
+    switch (exception) {
+      case exception.code == 'P2025':
+        response.status(HttpStatus.NOT_FOUND).json({
+          statusCode: HttpStatus.NOT_FOUND,
+          error: USER_NOT_FOUND,
+        });
+        break;
+      default:
+        response.status(status).json({
+          statusCode: status,
+          error: message,
+        });
     }
-    response.status(status).json({
-      statusCode: status,
-      error: message,
-    });
   }
 }
 
@@ -71,17 +74,19 @@ export class PrismaRoleExceptionFilter extends BaseExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const message = exception.message;
-    if (exception.meta) {
-      response.status(404).json({
-        statusCode: 404,
-        error: ROLE_NOT_FOUND,
-      });
-      return;
+    switch (exception) {
+      case exception.code == 'P2025':
+        response.status(HttpStatus.NOT_FOUND).json({
+          statusCode: HttpStatus.NOT_FOUND,
+          error: ROLE_NOT_FOUND,
+        });
+        break;
+      default:
+        response.status(status).json({
+          statusCode: status,
+          error: message,
+        });
     }
-    response.status(status).json({
-      statusCode: status,
-      error: message,
-    });
   }
 }
 
@@ -96,16 +101,45 @@ export class PrismaProfileExceptionFilter extends BaseExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const message = exception.message;
-    if (exception.meta) {
-      response.status(404).json({
-        statusCode: 404,
-        error: PROFILE_NOT_FOUND,
-      });
-      return;
+    switch (exception) {
+      case exception.code == 'P2025':
+        response.status(HttpStatus.NOT_FOUND).json({
+          statusCode: HttpStatus.NOT_FOUND,
+          error: PROFILE_NOT_FOUND,
+        });
+        break;
+      default:
+        response.status(status).json({
+          statusCode: status,
+          error: message,
+        });
     }
-    response.status(status).json({
-      statusCode: status,
-      error: message,
-    });
+  }
+}
+
+@Catch()
+export class PrismaTextBlockExceptionFilter extends BaseExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+    console.error(exception);
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.NOT_FOUND;
+    const message = exception.message;
+    switch (exception.code) {
+      case 'P2025':
+        response.status(HttpStatus.NOT_FOUND).json({
+          statusCode: HttpStatus.NOT_FOUND,
+          error: TEXT_NOT_FOUND,
+        });
+        break;
+      default:
+        response.status(status).json({
+          statusCode: status,
+          error: message.meta ? message.meta : message,
+        });
+    }
   }
 }

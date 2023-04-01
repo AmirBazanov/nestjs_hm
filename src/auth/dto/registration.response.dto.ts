@@ -1,20 +1,24 @@
 import { profiles, users } from '@prisma/client';
-import { IsEmail, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
-class User implements Omit<users, 'user_id' | 'refresh_token' | 'role'> {
+class UserResponse implements Omit<users, 'refresh_token' | 'password'> {
+  @ApiProperty({ example: 12 })
+  @IsNumber()
+  user_id: number;
   @ApiProperty({ example: 'test@gmail.com' })
   @IsEmail()
   email: string;
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'Admin' })
   @IsString()
-  password: string;
+  role: string;
 }
 
-export class RegistrationDto
-  implements Omit<profiles, 'profile_id' | 'user_id'>
-{
+export class RegistrationResponseDto implements Omit<profiles, 'user_id'> {
+  @ApiProperty({ example: 12 })
+  @IsNumber()
+  profile_id: number;
   @ApiProperty({ example: 'Tom' })
   @IsString()
   first_name: string;
@@ -32,10 +36,10 @@ export class RegistrationDto
   bio: string;
 
   @ApiProperty({
-    examples: ['test@gmail.com', 'password123'],
-    type: () => User,
+    examples: ['test@gmail.com'],
+    type: () => UserResponse,
   })
   @ValidateNested({ each: true })
-  @Type(() => User)
-  user: User;
+  @Type(() => UserResponse)
+  user: UserResponse;
 }

@@ -11,6 +11,8 @@ import { LoginDto } from './dto/login.dto';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { ProfilesService } from '../profiles/profiles.service';
 import { UsersService } from '../users/users.service';
+import { RegistrationResponseDto } from './dto/registration.response.dto';
+import { LoginResponseDto } from './dto/loginResponse.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -23,7 +25,7 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post('register')
-  @ApiCreatedResponse({ type: RegistrationDto })
+  @ApiCreatedResponse({ type: RegistrationResponseDto })
   async register(@Body() registrationDto: RegistrationDto) {
     const { user, ...profile } = registrationDto;
     const result = await this.usersService.create(user);
@@ -32,7 +34,7 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post('login')
-  @ApiCreatedResponse({ type: LoginDto })
+  @ApiCreatedResponse({ type: LoginResponseDto })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
